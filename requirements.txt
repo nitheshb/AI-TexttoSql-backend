@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+google-cloud-firestore
+google-auth
+openai==0.28.0
+python-dotenv
+pydantic
+supabase
+sqlalchemy
+psycopg2-binary
+pymysql
