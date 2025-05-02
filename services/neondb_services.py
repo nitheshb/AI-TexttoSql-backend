@@ -2,7 +2,7 @@ from typing import Dict, List, Any
 import openai
 import psycopg2
 import config
-from schema import DatabaseCredentials
+from schema import NeonDBCredentials
 from fastapi import HTTPException
 
 openai.api_key = config.OPENAI_API_KEY
@@ -87,9 +87,9 @@ Return ONLY PostgreSQL query, no additional explanations, comments, or paragraph
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating Neon DB query: {str(e)}")
 
-def execute_neon_query(sql_query: str, credentials: DatabaseCredentials) -> List[Dict[str, Any]]:
+def execute_neon_query(sql_query: str, credentials: NeonDBCredentials) -> List[Dict[str, Any]]:
     """
-    Execute the generated postgreSQL query and return the results.
+    Execute the generated NeonDB query and return the results.
     Requires credentials from frontend.
     """
     if not credentials:

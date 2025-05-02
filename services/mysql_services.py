@@ -1,7 +1,8 @@
+from typing import Dict, List, Any
 import openai
 from sqlalchemy import text, create_engine
 import config
-from schema import DatabaseCredentials
+from schema import MySQLCredentials
 from fastapi import HTTPException
 
 openai.api_key = config.OPENAI_API_KEY
@@ -103,16 +104,16 @@ Return ONLY MySQL query, no additional explanations, comments, or paragraphs. No
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating MySQL query: {str(e)}")
 
-def execute_mysql_query(sql_query: str, credentials: DatabaseCredentials):
+def execute_mysql_query(sql_query: str, credentials: MySQLCredentials) -> List[Dict[str, Any]]:
     """
-    Executes the raw SQL query and returns the result.
+    Execute the generated MySQL query and return the results.
     Requires credentials from frontend.
     """
     if not credentials:
         raise HTTPException(status_code=400, detail="Credentials are required")
         
-    if not credentials.host or not credentials.username or not credentials.password or not credentials.database_name:
-        raise HTTPException(status_code=400, detail="Required MySQL connection details missing in credentials")
+    if not credentials.host or not credentials.port or not credentials.username or not credentials.password or not credentials.database_name:
+        raise HTTPException(status_code=400, detail="Missing required MySQL credentials")
     
     connection = None
     try:

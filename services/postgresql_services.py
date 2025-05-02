@@ -2,7 +2,7 @@ from typing import Dict, List, Any
 import openai
 from sqlalchemy import text, create_engine
 import config
-from schema import DatabaseCredentials
+from schema import PostgreSQLCredentials
 from fastapi import HTTPException
 
 openai.api_key = config.OPENAI_API_KEY
@@ -87,7 +87,7 @@ Return ONLY PostgreSQL query, no additional explanations, comments, or paragraph
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating PostgreSQL query: {str(e)}")
 
-def execute_postgresql_query(sql_query: str, credentials: DatabaseCredentials) -> List[Dict[str, Any]]:
+def execute_postgresql_query(sql_query: str, credentials: PostgreSQLCredentials) -> List[Dict[str, Any]]:
     """
     Execute the generated postgreSQL query and return the results.
     Requires credentials from frontend.

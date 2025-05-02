@@ -5,7 +5,7 @@ from google.cloud import firestore
 from google.oauth2 import service_account
 import json
 import config
-from schema import DatabaseCredentials
+from schema import FirestoreCredentials
 import textwrap
 
 openai.api_key = config.OPENAI_API_KEY
@@ -16,7 +16,7 @@ COLLECTION_SCHEMA = {
     "orders": ["product_id", "customer_id", "quantity", "total_price", "order_status", "shipping_address", "order_date"]
 }
 
-def get_firestore_client_from_credentials(credentials: DatabaseCredentials) -> firestore.Client:
+def get_firestore_client_from_credentials(credentials: FirestoreCredentials) -> firestore.Client:
     """
     Create a Firestore client using provided credentials.
     """
@@ -101,7 +101,7 @@ Return ONLY executable Python code, no additional explanations, comments, or par
     print("code:", code)
     return code
 
-def execute_firebase_query(query_code: str, credentials: DatabaseCredentials) -> List[Dict[str, Any]]:
+def execute_firebase_query(query_code: str, credentials: FirestoreCredentials) -> List[Dict[str, Any]]:
     """
     Execute the generated query code and return the results.
     """

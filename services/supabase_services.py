@@ -5,11 +5,11 @@ from supabase import create_client
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 import config
-from schema import DatabaseCredentials
+from schema import SupabaseCredentials
 
 openai.api_key = config.OPENAI_API_KEY
 
-def create_execute_sql_function(credentials: DatabaseCredentials):
+def create_execute_sql_function(credentials: SupabaseCredentials):
     """
     Uses SQLAlchemy to create the execute_sql function directly in Supabase.
     Requires credentials parameter to create the function in the client's database.
@@ -139,7 +139,7 @@ Return ONLY PostgreSQL query, no additional explanations, comments, or paragraph
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating Supabase query: {str(e)}")
 
-def execute_supabase_query(sql_query: str, credentials: DatabaseCredentials) -> List[Dict[str, Any]]:
+def execute_supabase_query(sql_query: str, credentials: SupabaseCredentials) -> List[Dict[str, Any]]:
     """
     Execute the generated SQL query and return the results as a list of dictionaries.
     Requires credentials from frontend.
@@ -153,6 +153,9 @@ def execute_supabase_query(sql_query: str, credentials: DatabaseCredentials) -> 
 
         if not credentials.supabase_url or not credentials.supabase_key:
             raise HTTPException(status_code=400, detail="Missing Supabase URL or API key in credentials")
+            
+        if not credentials.database_url:
+            raise HTTPException(status_code=400, detail="Database URL is required in credentials")
             
         client = create_client(credentials.supabase_url, credentials.supabase_key)
         
