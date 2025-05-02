@@ -132,10 +132,10 @@ async def firestore_query(request: QueryRequest):
     try:
         generated_query = generate_redefine_firebase_query(request.query)
         results = execute_redefine_firebase_query(generated_query)
-        human_readable = transform_to_system_response(request.query, generated_query, results, query_type="FIRESTORE")
+        # human_readable = transform_to_system_response(request.query, generated_query, results, query_type="FIRESTORE")
                 
         return {
-            "response": human_readable
+            "response": results
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

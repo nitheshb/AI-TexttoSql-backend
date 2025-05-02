@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 openai.api_key = config.OPENAI_API_KEY
 
-def generate_mysql_query(query: str) -> str:
+def generate_mysql_query(query: str, prompt_helper: str = None) -> str:
     """Generates SQL query from a natural language query using OpenAI's chat models."""
 
     prompt = """

@@ -19,14 +19,14 @@ def get_firestore_client() -> firestore.Client:
     credentials_info = {
         "type": "service_account",
         "project_id": os.getenv("GOOGLE_APPLICATION_CREDENTIALS_PROJECT_ID"),
-        "private_key_id": "not-required",
+        "private_key_id": "9bab6dfee14954c001e16b9f570b757406ee424c",
         "private_key": os.getenv("GOOGLE_APPLICATION_CREDENTIALS_PRIVATE_KEY").replace("\\n", "\n"),
         "client_email": os.getenv("GOOGLE_APPLICATION_CREDENTIALS_CLIENT_EMAIL"),
-        "client_id": "not-required",
+        "client_id": "112615983915819691576",
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{os.getenv('GOOGLE_APPLICATION_CREDENTIALS_CLIENT_EMAIL').replace('@', '%40')}"
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-nps4y%40redefine-erp.iam.gserviceaccount.com"
     }
 
     for key, value in credentials_info.items():

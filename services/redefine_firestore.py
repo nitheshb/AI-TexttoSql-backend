@@ -5,7 +5,7 @@ from google.cloud import firestore
 import json
 from config import get_firestore_client
 import config
-
+from datetime import datetime
 
 openai.api_key = config.OPENAI_API_KEY
 
@@ -18,7 +18,7 @@ COLLECTION_SCHEMA = {
         "west_sch_by", "south_d", "intype", "pId", "area", "east_d", "phaseId", "north_south_d", 
         "south_sch_by", "size", "mode", "status", "east_sch_by", "survey_no", "west_d", "unit_type", 
         "release_status", "unit_no", "by", "mortgage_type", "east_west_d", "area_sqm", "unit_d", 
-        "Date", "plc_per_sqft"], 
+        "Date", "plc_per_sqft","T_balance","T_total","T_elgible","T_elgible_balance","booked_on"], 
     "spark_projects": ["id", "bmrdaEndDate", "uid", "areaDropDownPrimary", "hdmaEndDate", "soldArea", "status", 
         "hdmaStartDate", "editMode", "area", "city", "areaDropdownSecondary", "t_bal", "projectName", 
         "areaTextPrimary", "created", "builderGSTno", "bookUnitCount", "s_agreeCount", "builder_bank_details", 
@@ -44,6 +44,57 @@ def generate_redefine_firebase_query(query_text: str) -> str:
 Using this schema:
 {json.dumps(COLLECTION_SCHEMA, indent=2)}
 
+1. **spark_units Collection**:  
+    - **Katha_no** (STRING): The Katha number, typically a legal property identification number (can be blank).  
+    - **blockId** (INTEGER): Identifier for the block in which the unit is located.  
+    - **PID_no** (STRING): Property Identification Number, used for official property records (can be blank).  
+    - **facing** (STRING): Direction the plot/unit is facing (e.g., SOUTH-WEST).  
+    - **sqft_rate** (STRING): Rate per square foot for the unit, typically in currency (e.g., 3750).  
+    - **north_d** (STRING): Distance (in meters or feet) of the northern boundary.  
+    - **north_sch_by** (STRING): Description of the boundary on the northern side (e.g., adjacent plot number).  
+    - **west_sch_by** (STRING): Description of the boundary on the western side.  
+    - **south_d** (STRING): Distance of the southern boundary.  
+    - **intype** (STRING): Input type or categorization of the unit, such as 'bulk'.  
+    - **pId** (STRING): Unique identifier for the project or parent entity the unit belongs to (UUID format).  
+    - **area** (STRING): Total area of the unit in square feet (may contain comma formatting).  
+    - **east_d** (STRING): Distance of the eastern boundary.  
+    - **phaseId** (INTEGER): Identifier for the phase within the block/project.  
+    - **north_south_d** (INTEGER): Combined distance or differential measurement from north to south (0 if not applicable).  
+    - **south_sch_by** (STRING): Description of the boundary on the southern side.  
+    - **size** (STRING): Description of the size or layout type (e.g., 'UNIQUE').  
+    - **mode** (STRING): Mode of entry or validation status (e.g., 'valid').  
+    - **status** (STRING): Current availability status of the unit (e.g., 'available').  
+    - **east_sch_by** (STRING): Description of the boundary on the eastern side.  
+    - **survey_no** (STRING): Survey number associated with the property (can be blank).  
+    - **west_d** (STRING): Distance of the western boundary.  
+    - **unit_type** (STRING): Type of unit, such as 'plot'.  
+    - **release_status** (STRING): Indicates whether the unit is released for sale (e.g., 'Un Released').  
+    - **unit_no** (STRING): Unit number within the block/phase (e.g., '46').  
+    - **by** (STRING): Email ID of the person who added or last modified the unit. It cannot be used as doc id. Containing relationship with user collection email field  
+    - **mortgage_type** (STRING): Type of mortgage, if applicable (e.g., 'NA' for not applicable).  
+    - **east_west_d** (INTEGER): Combined distance or differential measurement from east to west (0 if not applicable).  
+    - **area_sqm** (STRING): Area of the unit in square meters.  
+    - **unit_d** (STRING): Total calculated unit distance (likely perimeter or another derived metric).  
+    - **Date** (TIMESTAMP): Timestamp (epoch milliseconds) indicating creation or update time.  
+    - **plc_per_sqft** (STRING): Preferential Location Charges per square foot, if applicable.  
+    - **id** (STRING): Unique document ID in the database (custom or auto-generated).  
+
+2. **users Collection**:  
+    - **empId** (STRING): Employee identifier or username assigned to the user (e.g., 'revati').  
+    - **uid** (STRING): Unique user ID used for authentication (e.g., Firebase UID).  
+    - **offPh** (STRING): Official phone number of the user.  
+    - **projAccessA** (ARRAY of STRING): List of project IDs the user has access to.  
+    - **userStatus** (STRING): Current status of the user (e.g., 'active', 'inactive').  
+    - **orgName** (STRING): Name of the organization the user belongs to.  
+    - **roles** (ARRAY of STRING): Roles assigned to the user (e.g., 'sales-manager').  
+    - **department** (ARRAY of STRING): Departments the user is associated with (e.g., 'sales').  
+    - **perPh** (STRING): Personal phone number of the user.  
+    - **email** (STRING): Email address of the user.  
+    - **orgStatus** (STRING): Status of the organization the user belongs to (e.g., 'active').  
+    - **orgId** (STRING): Unique identifier for the organization (e.g., 'testEnv').  
+    - **name** (STRING): Display name or employee code (e.g., '101').  
+    - **id** (STRING): Document ID in the database, usually same as `uid`.  
+
 Generate Python code that queries Firestore collections. If the query involves references to other collections:
 1. Identify the collections referenced in the query based on the schema provided
 2. First query the initial collection
@@ -56,7 +107,8 @@ The code must:
 3. Include document IDs in the results using doc.id
 4. Use proper Firestore methods (.where(), .order_by(), .limit(), etc.)
 
-***Return ONLY executable Python code. Do not include any additional explanations, comments, or paragraphs. No text other than the python firetsore query code.***
+
+***Return ONLY executable Python code. Do not include any additional explanations, comments or paragraphs. No code other than the python firetsore query code.***
 
 Example of what the response should look like: (for reference only):
 results = []
@@ -82,6 +134,18 @@ return results
     )
     
     code = response['choices'][0]['message']['content'].strip()
+    if code.startswith("```python"):
+        code = code[len("```python"):].strip()
+    if code.startswith("```"):
+        code = code[3:].strip()
+    if code.endswith("```"):
+        code = code[:-3].strip()
+    if code.startswith("#"):
+        code = code[3:].strip()
+
+    code = "\n".join(
+    line for line in code.splitlines() if not line.lstrip().startswith("#"))
+
     print("code:", code)
 
     return code

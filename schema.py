@@ -19,4 +19,4 @@ class QueryRequest(BaseModel):
     credentials: Optional[DatabaseCredentials] = None
 
 class QueryResponse(BaseModel):
-    response: str
+    response: Any
